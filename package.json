@@ -1,0 +1,71 @@
+{
+  "name": "solid-js-date-components",
+  "private": false,
+  "version": "0.0.0",
+  "description": "",
+  "author": "funny-family <https://github.com/funny-family>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/funny-family/solid-js-date-components.git"
+  },
+  "homepage": "https://github.com/funny-family/solid-js-date-components#readme",
+  "bugs": {
+    "url": "https://github.com/funny-family/solid-js-date-components/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "solid",
+    "solid-js",
+    "solid js",
+    "solid-js-date-components",
+    "components",
+    "component",
+    "date",
+    "date field",
+    "date component",
+    "date picker",
+    "calendar"
+  ],
+  "type": "module",
+  "types": "./dist/types/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "main": "./dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./styles.css": "./dist/styles/styles.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "concurrently \"rm -rf ./dist\" \"pnpm build:watch\"",
+    "vite:build": "vite build",
+    "build": "./scripts/build.sh",
+    "build:watch": "vite build --watch",
+    "release": "release-it",
+    "publish": "pnpm build && pnpm release"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.41",
+    "postcss-load-config": "^4.0.2",
+    "release-it": "^16.3.0",
+    "sass": "^1.77.8",
+    "typescript": "^5.5.4",
+    "vite": "^4.5.3",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-solid": "^2.10.2"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.8.19"
+  }
+}
