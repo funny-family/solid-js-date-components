@@ -27,8 +27,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@src': resolvePath('./src/'),
-      '@lib': resolvePath('../lib/'),
+      // '@src': resolvePath('./src/'),
+      // '@lib': resolvePath('../lib/'),
     },
   },
   build: {
@@ -36,7 +36,7 @@ export default defineConfig({
     outDir: resolvePath('../docs'),
   },
   server: {
-    port: 2311,
+    port: 3476,
     strictPort: true,
   },
 });
