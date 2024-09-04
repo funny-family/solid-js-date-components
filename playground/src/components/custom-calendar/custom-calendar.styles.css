@@ -1,0 +1,47 @@
+@scope (.custom-calendar) {
+  :scope {
+    width: fit-content;
+    border: 1px solid black;
+  }
+
+  .custom-calendar-grid {
+    --gap: 8px;
+
+    display: grid;
+    gap: var(--gap);
+    column-gap: calc(var(--gap) + 2px);
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+  }
+
+  .header__button {
+    cursor: pointer;
+  }
+
+  .header__year {
+    /*  */
+  }
+
+  .week-days {
+    border-top: 1px solid black;
+  }
+
+  .month-days {
+    border-top: 1px solid black;
+  }
+
+  .day {
+    text-align: center;
+    padding: 0.4em;
+
+    &:hover {
+      cursor: pointer;
+      background-color: lightgray;
+    }
+  }
+}
