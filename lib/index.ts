@@ -73,12 +73,6 @@ export var createCalendar = (initialDate: Date, option?: Map<string, any>) => {
     dayOfTheWeekIndex
   );
 
-  var monthIndex = initialDate.getMonth();
-
-  var getStartDay = () => {
-    return calculateStartDate(date, dayOfTheWeekIndex);
-  };
-
   var startDate = calculateStartDate(date, dayOfTheWeekIndex);
   var startDateTime = startDate.getTime();
 
@@ -87,7 +81,6 @@ export var createCalendar = (initialDate: Date, option?: Map<string, any>) => {
 
   var store = createMutable({
     year: 0,
-    monthIndex,
     days: Array.from({ length: possibleDaysInCalendar }, (_, index) => {
       return calculateDay(startDate, startDateTime, index);
     }),
@@ -151,7 +144,6 @@ export var createCalendar = (initialDate: Date, option?: Map<string, any>) => {
     possibleDaysInCalendar,
     days: store.days as Readonly<typeof store.days>,
     year: store.year as Readonly<typeof store.year>,
-    monthIndex: store.monthIndex as Readonly<typeof store.monthIndex>,
     calculateDaysOfMonth,
     calculatePreviousDaysOfMonth,
     calculateNextDaysOfMonth,
