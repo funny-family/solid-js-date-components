@@ -21,8 +21,7 @@ export var createMonthCalendar = (
     5: 'Friday'
     6: 'Saturday'
   */
-  // var dayOfTheWeekIndex: number = option?.get('dayOfTheWeekIndex') || 0;
-  var dayOfTheWeekIndex: number = 0;
+  var dayOfTheWeekIndex: number = option?.get('dayOfTheWeekIndex') || 0;
   var mutableDate = new Date(
     initialDate.getFullYear(),
     initialDate.getMonth(),
@@ -33,55 +32,79 @@ export var createMonthCalendar = (
   var startDateTime = startDate.getTime();
 
   /* export */
-  var possibleDaysInMonth = 42 as const;
+  var possibleDaysInCalendar = 42 as const;
+  var l = 21; // "24 / 2 = 21"
 
-  // /* export */
-  // var days = Array.from({ length: possibleDaysInMonth }, (_, index) => {
-  //   var newDate = new Date(startDateTime);
-  //   var signal = createSignal(newDate, {
-  //     equals: false,
-  //   });
+  var store = createMutable({
+    /* export */
+    currentMonthIndex: 0,
+    /* export */
+    currentYear: 0,
+    /* export */
+    daysOfTheMonth: Array.from(
+      { length: possibleDaysInCalendar },
+      (_, index) => {
+        const date = calculateDay(startDate, index, startDateTime);
 
-  //   calculateDay(newDate, index);
-
-  //   (signal[0] as any)[DATE_SIGNAL_SETTER] = signal[1];
-
-  //   return signal[0];
-  // });
-  var days = Array.from({ length: possibleDaysInMonth }, (_, index) => {
-    var newDate = new Date(startDateTime);
-    var signal = createSignal(newDate, {
-      equals: false,
-    });
-
-    calculateDay(newDate, index);
-
-    (signal[0] as any)[DATE_SIGNAL_SETTER] = signal[1];
-
-    return signal[0];
+        return {
+          day: date.getDate(),
+          weekDayIndex: date.getDay(),
+          monthIndex: date.getMonth(),
+          year: date.getFullYear(),
+          time: date.getTime(),
+        };
+      }
+    ),
   });
+
+  // mutableDate.setFullYear(initialDate.getFullYear());
+  // mutableDate.setMonth(initialDate.getMonth());
+  // mutableDate.setDate(dayOfTheWeekIndex);
+
+  store.currentMonthIndex = store.daysOfTheMonth[l].monthIndex;
+  store.currentYear = store.daysOfTheMonth[l].year;
 
   /* export */
   var calculateDays = (predicate: () => number) => {
-    mutableDate.setTime(predicate());
+    var timeValue = predicate();
+
+    mutableDate.setTime(timeValue);
+    console.log({ mutableDate, m: mutableDate.getMonth() });
+    var currentMonthIndex = mutableDate.getMonth();
+    var currentYear = mutableDate.getFullYear();
     mutableDate.setDate(dayOfTheWeekIndex);
 
     var startDate = calculateStartDate(mutableDate, dayOfTheWeekIndex);
     var startDateTime = startDate.getTime();
 
     batch(() => {
-      days.forEach((day, index) => {
-        (day as any)[DATE_SIGNAL_SETTER]((date: Date) => {
-          return calculateDay(date, index, startDateTime);
-        });
+      store.currentMonthIndex = currentMonthIndex;
+      store.currentYear = currentYear;
+
+      store.daysOfTheMonth.forEach((dayOfTheMonth, index) => {
+        const date = calculateDay(startDate, index, startDateTime);
+
+        dayOfTheMonth.day = date.getDate();
+        dayOfTheMonth.weekDayIndex = date.getDay();
+        dayOfTheMonth.monthIndex = date.getMonth();
+        dayOfTheMonth.year = date.getFullYear();
+        dayOfTheMonth.time = date.getTime();
       });
+
+      console.log({ currentMonthIndex, currentYear });
     });
   };
 
   return {
     [DATE_SYMBOL]: mutableDate,
-    possibleDaysInMonth,
-    days: days as Readonly<typeof days>,
+    possibleDaysInCalendar,
+    currentMonthIndex: store.currentMonthIndex as Readonly<
+      typeof store.currentMonthIndex
+    >,
+    currentYear: store.currentYear as Readonly<typeof store.currentYear>,
+    daysOfTheMonth: store.daysOfTheMonth as Readonly<
+      typeof store.daysOfTheMonth
+    >,
     calculateDays,
   };
 };
