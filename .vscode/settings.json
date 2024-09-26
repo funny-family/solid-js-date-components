@@ -30,6 +30,7 @@
     "focusable",
     "hoverable",
     "labelledby",
+    "proxified",
     "resizer",
     "solidjs",
     "tooltipable",
