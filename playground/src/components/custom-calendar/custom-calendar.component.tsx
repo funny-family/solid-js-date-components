@@ -2,30 +2,15 @@ import './custom-calendar.styles.css';
 import { Component, createEffect, createMemo, For, Index, on } from 'solid-js';
 // import { createCalendar } from '../../../../lib';
 import { createMonthCalendar } from '../../../../lib/core/create-month-calendar';
-import { MonthName } from '../../../../lib/core/create-month-calendar/month.component';
+import {
+  createWeekdayList,
+  padWithZero,
+  weekdayListWithDefaultArgs,
+} from './utils';
 
 // var monthFormate = new Intl.DateTimeFormat('ru', { month: 'long' });
 var monthFormate = new Intl.DateTimeFormat('en-us', { month: 'long' });
 var formatMonth = monthFormate.format;
-
-var getMonth = (monthIndex: number, format?: (index: number) => string) => {
-  format = monthFormate.format;
-
-  var month = () => {
-    return '';
-  };
-
-  // createEffect(
-  //   on(
-  //     () => monthIndex,
-  //     (index) => {
-  //       month = () => format(index);
-  //     }
-  //   )
-  // );
-
-  return month;
-};
 
 export var CustomCalendar: Component = () => {
   var monthCalendar = createMonthCalendar(new Date());
@@ -34,6 +19,8 @@ export var CustomCalendar: Component = () => {
   var getDate = (date: Date) => {
     return date.getDate();
   };
+
+  var d = weekdayListWithDefaultArgs(createWeekdayList);
 
   // createEffect(
   //   on(
@@ -44,8 +31,6 @@ export var CustomCalendar: Component = () => {
   //   )
   // );
 
-  var month = getMonth(monthCalendar.monthIndex);
-
   return (
     <div class="custom-calendar">
       <div class="header">
@@ -53,7 +38,7 @@ export var CustomCalendar: Component = () => {
           class="header__button"
           type="button"
           onClick={() => {
-            // calendar.calculatePreviousDaysOfMonth();
+            monthCalendar.calculatePreviousMonth();
           }}
         >
           {'<-'}
@@ -64,18 +49,13 @@ export var CustomCalendar: Component = () => {
           class="header__button"
           type="button"
           onClick={() => {
-            // calendar.calculateNextDaysOfMonth();
+            monthCalendar.calculateNextMonth();
           }}
         >
           {'->'}
         </button>
       </div>
       <div class="week-days custom-calendar-grid">
-        {/* <Index each={['Mon', 'Tue', 'Wen', 'Thr', 'Fri', 'Sat', 'Sun']}>
-          {(dayOfTheWeek) => {
-            return <div>{dayOfTheWeek()}</div>;
-          }}
-        </Index> */}
         <For each={['Sun', 'Mon', 'Tue', 'Wen', 'Thr', 'Fri', 'Sat']}>
           {(dayOfTheWeek) => {
             return <div>{dayOfTheWeek}</div>;
@@ -85,7 +65,11 @@ export var CustomCalendar: Component = () => {
       <div class="month-days custom-calendar-grid">
         <For each={monthCalendar.daysOfTheMonth}>
           {(dayOfTheMonth) => {
-            return <div class="day">{dayOfTheMonth.getDate()}</div>;
+            return (
+              <div class="day">
+                {padWithZero(dayOfTheMonth.getDate().toString())}
+              </div>
+            );
           }}
         </For>
       </div>
