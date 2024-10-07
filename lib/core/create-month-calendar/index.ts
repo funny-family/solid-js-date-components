@@ -1,4 +1,4 @@
-import { batch, createSignal } from 'solid-js';
+import { batch, createSignal, Index } from 'solid-js';
 import { createMutable } from 'solid-js/store';
 import {
   DATE_SIGNAL_SETTER,
@@ -6,7 +6,6 @@ import {
   calculateDay,
   calculateStartDate,
 } from './utils';
-import { ReactiveDate } from '../../reactive-date';
 
 export var createMonthCalendar = (
   initialDate: Date,
@@ -32,79 +31,89 @@ export var createMonthCalendar = (
   var startDateTime = startDate.getTime();
 
   /* export */
-  var possibleDaysInCalendar = 42 as const;
-  var l = 21; // "24 / 2 = 21"
+  var daysInCalendar = 42 as const;
+  // var l = 21; // "24 / 2 = 21"
 
-  var store = createMutable({
-    /* export */
-    currentMonthIndex: 0,
-    /* export */
-    currentYear: 0,
-    /* export */
-    daysOfTheMonth: Array.from(
-      { length: possibleDaysInCalendar },
-      (_, index) => {
-        const date = calculateDay(startDate, index, startDateTime);
+  /*  export */
+  var monthIndex = initialDate.getMonth();
+  /* export */
+  var year = initialDate.getFullYear();
+  /* export */
+  var dateTime = initialDate.getTime();
 
-        return {
-          day: date.getDate(),
-          weekDayIndex: date.getDay(),
-          monthIndex: date.getMonth(),
-          year: date.getFullYear(),
-          time: date.getTime(),
-        };
-      }
-    ),
+  var length = daysInCalendar;
+  /* export */
+  const daysOfTheMonth = Array.from({ length }, (_, index) => {
+    const date = new Date(startDateTime);
+
+    return calculateDay(date, index);
   });
 
-  // mutableDate.setFullYear(initialDate.getFullYear());
-  // mutableDate.setMonth(initialDate.getMonth());
-  // mutableDate.setDate(dayOfTheWeekIndex);
-
-  store.currentMonthIndex = store.daysOfTheMonth[l].monthIndex;
-  store.currentYear = store.daysOfTheMonth[l].year;
-
   /* export */
-  var calculateDays = (predicate: () => number) => {
-    var timeValue = predicate();
+  var calculateMonth = (predicate: () => number | Date) => {
+    var timeValue = Number(predicate());
 
     mutableDate.setTime(timeValue);
-    console.log({ mutableDate, m: mutableDate.getMonth() });
-    var currentMonthIndex = mutableDate.getMonth();
-    var currentYear = mutableDate.getFullYear();
+
+    batch(() => {
+      var monthIndex = mutableDate.getMonth();
+      var year = mutableDate.getFullYear();
+      var time = mutableDate.getTime();
+
+      store.monthIndex = monthIndex;
+      store.year = year;
+      store.dateTime = time;
+    });
+
     mutableDate.setDate(dayOfTheWeekIndex);
 
     var startDate = calculateStartDate(mutableDate, dayOfTheWeekIndex);
     var startDateTime = startDate.getTime();
 
-    batch(() => {
-      store.currentMonthIndex = currentMonthIndex;
-      store.currentYear = currentYear;
+    /*
+      Note that all "strange" calculation that we are doing in loop below is because "solidjs" sucks ass hard.
+      Also, calendar recalculation should not be inside "batch", since ("solidjs" sucks ass hard) and we need to update array somehow.
+    */
+    var tempDate = null as unknown as Date;
+    var daysOfTheMonth = store.daysOfTheMonth;
+    for (var i = 0; i < daysOfTheMonth.length; i++) {
+      // store date in temporal variable for future use
+      (tempDate as any) = daysOfTheMonth[i];
+      // nullify the date in the array so it can be recalculated next time
+      daysOfTheMonth[i] = mutableDate;
+      // recalculate the date in the array at the current index with the updated start date and time
+      daysOfTheMonth[i] = calculateDay(tempDate, i, startDateTime);
+    }
+  };
 
-      store.daysOfTheMonth.forEach((dayOfTheMonth, index) => {
-        const date = calculateDay(startDate, index, startDateTime);
+  var calculateMonthByIndex = (offset: number) => () => {
+    mutableDate.setTime(store.dateTime);
+    // prettier-ignore
+    var monthIndex = (mutableDate.getMonth() + (+offset))
+    mutableDate.setMonth(monthIndex);
+    var newDateTime = mutableDate.getTime();
 
-        dayOfTheMonth.day = date.getDate();
-        dayOfTheMonth.weekDayIndex = date.getDay();
-        dayOfTheMonth.monthIndex = date.getMonth();
-        dayOfTheMonth.year = date.getFullYear();
-        dayOfTheMonth.time = date.getTime();
-      });
-
-      console.log({ currentMonthIndex, currentYear });
+    calculateMonth(() => {
+      return newDateTime;
     });
   };
 
-  return {
-    [DATE_SYMBOL]: mutableDate,
-    possibleDaysInCalendar,
-    currentMonthIndex: store.currentMonthIndex as Readonly<
-      typeof store.currentMonthIndex
-    >,
-    currentYear: store.currentYear as Readonly<typeof store.currentYear>,
-    daysOfTheMonth: store.daysOfTheMonth as Readonly<
-      typeof store.daysOfTheMonth
-    >,
-    calculateDays,
-  };
+  /* export */
+  var calculatePreviousMonth = calculateMonthByIndex(-1);
+
+  /* export */
+  var calculateNextMonth = calculateMonthByIndex(1);
+
+  var store = createMutable({
+    daysInCalendar,
+    monthIndex,
+    year,
+    dateTime,
+    daysOfTheMonth,
+    calculateMonth,
+    calculatePreviousMonth,
+    calculateNextMonth,
+  });
+
+  return store;
 };
