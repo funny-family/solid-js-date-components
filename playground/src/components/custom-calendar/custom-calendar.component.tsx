@@ -1,26 +1,32 @@
 import './custom-calendar.styles.css';
-import { Component, createEffect, createMemo, For, Index, on } from 'solid-js';
-// import { createCalendar } from '../../../../lib';
+import {
+  Component,
+  createEffect,
+  createMemo,
+  For,
+  Index,
+  on,
+  Show,
+} from 'solid-js';
 import { createMonthCalendar } from '../../../../lib/core/create-month-calendar';
 import {
   createWeekdayList,
+  isWeekend,
   padWithZero,
-  weekdayListWithDefaultArgs,
-} from './utils';
+} from '../../../../lib/core/utils';
 
-// var monthFormate = new Intl.DateTimeFormat('ru', { month: 'long' });
 var monthFormate = new Intl.DateTimeFormat('en-us', { month: 'long' });
 var formatMonth = monthFormate.format;
 
+var weekdayFormate = new Intl.DateTimeFormat('en-us', { weekday: 'short' });
+var formatWeekday = weekdayFormate.format;
+
 export var CustomCalendar: Component = () => {
-  var monthCalendar = createMonthCalendar(new Date());
+  var date = new Date();
+  var monthCalendar = createMonthCalendar(date);
   window.customMonthCalendar = monthCalendar;
 
-  var getDate = (date: Date) => {
-    return date.getDate();
-  };
-
-  var d = weekdayListWithDefaultArgs(createWeekdayList);
+  var weekdays = createWeekdayList(0, formatWeekday);
 
   // createEffect(
   //   on(
@@ -56,18 +62,43 @@ export var CustomCalendar: Component = () => {
         </button>
       </div>
       <div class="week-days custom-calendar-grid">
-        <For each={['Sun', 'Mon', 'Tue', 'Wen', 'Thr', 'Fri', 'Sat']}>
+        <For each={weekdays}>
           {(dayOfTheWeek) => {
-            return <div>{dayOfTheWeek}</div>;
+            return <div style={{ 'text-align': 'center' }}>{dayOfTheWeek}</div>;
           }}
         </For>
       </div>
       <div class="month-days custom-calendar-grid">
         <For each={monthCalendar.daysOfTheMonth}>
           {(dayOfTheMonth) => {
+            var day = padWithZero(`${dayOfTheMonth.getDate()}`);
+
+            var visibility = (
+              dayOfTheMonth.getMonth() === monthCalendar.monthIndex
+                ? undefined
+                : 'hidden'
+            ) as any;
+
+            var _color = () => {
+              if (isWeekend(dayOfTheMonth)) {
+                return 'red';
+              }
+
+              return dayOfTheMonth.getMonth() === monthCalendar.monthIndex
+                ? undefined
+                : 'gainsboro';
+            };
+            var color = _color();
+
             return (
-              <div class="day">
-                {padWithZero(dayOfTheMonth.getDate().toString())}
+              <div
+                class="day"
+                style={{
+                  // visibility,
+                  color,
+                }}
+              >
+                {day}
               </div>
             );
           }}
