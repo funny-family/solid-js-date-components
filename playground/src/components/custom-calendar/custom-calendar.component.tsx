@@ -14,6 +14,7 @@ import {
   isWeekend,
   padWithZero,
 } from '../../../../lib/core/utils';
+import { YearSelect } from '../../../../lib/core/components/year-select/year-select.component';
 
 var monthFormate = new Intl.DateTimeFormat('en-us', { month: 'long' });
 var formatMonth = monthFormate.format;
@@ -49,7 +50,10 @@ export var CustomCalendar: Component = () => {
         >
           {'<-'}
         </button>
-        <div class="header__year">{monthCalendar.year}</div>
+        <div class="header__year">
+          {monthCalendar.year}
+          <YearSelect />
+        </div>
         <div class="header__month">{formatMonth(monthCalendar.dateTime)}</div>
         <button
           class="header__button"
@@ -79,24 +83,26 @@ export var CustomCalendar: Component = () => {
                 : 'hidden'
             ) as any;
 
-            var _color = () => {
+            var _color = (dayOfTheMonth: Date, monthIndex: number) => {
               if (isWeekend(dayOfTheMonth)) {
                 return 'red';
               }
 
-              return dayOfTheMonth.getMonth() === monthCalendar.monthIndex
+              return dayOfTheMonth.getMonth() === monthIndex
                 ? undefined
                 : 'gainsboro';
             };
-            var color = _color();
+            var color = _color(dayOfTheMonth, monthCalendar.monthIndex);
 
             return (
               <div
                 class="day"
-                style={{
-                  // visibility,
-                  color,
-                }}
+                style={
+                  {
+                    // visibility,
+                    // color,
+                  }
+                }
               >
                 {day}
               </div>
