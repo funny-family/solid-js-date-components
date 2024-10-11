@@ -35,6 +35,7 @@
     "solidjs",
     "tooltipable",
     "tsconfigs",
-    "vinxi"
+    "vinxi",
+    "Wrappable"
   ]
 }
