@@ -1,11 +1,13 @@
-import { batch, createSignal, Index } from 'solid-js';
-import { createMutable } from 'solid-js/store';
+import { batch, createSignal, Index, $PROXY } from 'solid-js';
+import { createMutable, createStore } from 'solid-js/store';
 import {
   DATE_SIGNAL_SETTER,
   DATE_SYMBOL,
   calculateDay,
   calculateStartDate,
 } from './utils';
+
+export var SET_STATE_SYMBOL = Symbol('SET_STATE_SYMBOL');
 
 export var createMonthCalendar = (
   initialDate: Date,
@@ -55,14 +57,27 @@ export var createMonthCalendar = (
 
     mutableDate.setTime(timeValue);
 
-    batch(() => {
+    // batch(() => {
+    //   var monthIndex = mutableDate.getMonth();
+    //   var year = mutableDate.getFullYear();
+    //   var time = mutableDate.getTime();
+
+    //   store.monthIndex = monthIndex;
+    //   store.year = year;
+    //   store.dateTime = time;
+    // });
+
+    setState((state) => {
       var monthIndex = mutableDate.getMonth();
       var year = mutableDate.getFullYear();
-      var time = mutableDate.getTime();
+      var dateTime = mutableDate.getTime();
 
-      store.monthIndex = monthIndex;
-      store.year = year;
-      store.dateTime = time;
+      return {
+        ...state,
+        monthIndex,
+        year,
+        dateTime,
+      };
     });
 
     mutableDate.setDate(dayOfTheWeekIndex);
@@ -75,19 +90,26 @@ export var createMonthCalendar = (
       Also, calendar recalculation should not be inside "batch", since ("solidjs" sucks ass hard) and we need to update array somehow.
     */
     var tempDate = null as unknown as Date;
-    var daysOfTheMonth = store.daysOfTheMonth;
+    // var daysOfTheMonth = store.daysOfTheMonth;
+    var daysOfTheMonth = state.daysOfTheMonth;
     for (var i = 0; i < daysOfTheMonth.length; i++) {
       // store date in temporal variable for future use
       (tempDate as any) = daysOfTheMonth[i];
+      // // nullify the date in the array so it can be recalculated next time
+      // daysOfTheMonth[i] = mutableDate;
+      // // recalculate the date in the array at the current index with the updated start date and time
+      // daysOfTheMonth[i] = calculateDay(tempDate, i, startDateTime);
+
       // nullify the date in the array so it can be recalculated next time
-      daysOfTheMonth[i] = mutableDate;
+      setState('daysOfTheMonth', i, mutableDate);
       // recalculate the date in the array at the current index with the updated start date and time
-      daysOfTheMonth[i] = calculateDay(tempDate, i, startDateTime);
+      setState('daysOfTheMonth', i, calculateDay(tempDate, i, startDateTime));
     }
   };
 
   var calculateMonthByIndex = (offset: number) => () => {
-    mutableDate.setTime(store.dateTime);
+    // mutableDate.setTime(store.dateTime);
+    mutableDate.setTime(state.dateTime);
     // prettier-ignore
     var monthIndex = (mutableDate.getMonth() + (+offset))
     mutableDate.setMonth(monthIndex);
@@ -104,7 +126,20 @@ export var createMonthCalendar = (
   /* export */
   var calculateNextMonth = calculateMonthByIndex(1);
 
-  var store = createMutable({
+  // var store = createMutable({
+  //   daysInCalendar,
+  //   monthIndex,
+  //   year,
+  //   dateTime,
+  //   daysOfTheMonth,
+  //   calculateMonth,
+  //   calculatePreviousMonth,
+  //   calculateNextMonth,
+  // });
+
+  // return store;
+
+  var [state, setState] = createStore({
     daysInCalendar,
     monthIndex,
     year,
@@ -115,5 +150,11 @@ export var createMonthCalendar = (
     calculateNextMonth,
   });
 
-  return store;
+  Object.defineProperty(state, SET_STATE_SYMBOL, {
+    value: setState,
+    configurable: false,
+    enumerable: true,
+  });
+
+  return state;
 };
