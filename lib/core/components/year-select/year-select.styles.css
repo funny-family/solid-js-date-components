@@ -1,3 +1,8 @@
 .year-select {
-  max-width: 200px;
+  width: 60px;
+  font-size: 1rem;
+}
+
+.year-select input {
+  width: inherit;
 }
