@@ -8,6 +8,7 @@ import {
 } from './utils';
 
 export var SET_STATE_SYMBOL = Symbol('SET_STATE_SYMBOL');
+export var MUTABLE_DATE_SYMBOL = Symbol('MUTABLE_DATE_SYMBOL');
 
 export var createMonthCalendar = (
   initialDate: Date,
@@ -152,6 +153,12 @@ export var createMonthCalendar = (
 
   Object.defineProperty(state, SET_STATE_SYMBOL, {
     value: setState,
+    configurable: false,
+    enumerable: true,
+  });
+
+  Object.defineProperty(state, MUTABLE_DATE_SYMBOL, {
+    value: mutableDate,
     configurable: false,
     enumerable: true,
   });
