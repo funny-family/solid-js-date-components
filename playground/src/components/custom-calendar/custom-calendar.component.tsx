@@ -9,6 +9,7 @@ import {
   Show,
 } from 'solid-js';
 import { createMonthCalendar } from '../../../../lib/core/create-month-calendar';
+import { withMinMaxDate } from '../../../../lib/plugins/with-min-max-date/with-min-max-date.plugin';
 import {
   createWeekdayList,
   isWeekend,
@@ -24,6 +25,11 @@ var formatWeekday = weekdayFormate.format;
 
 export var CustomCalendar: Component = () => {
   var date = new Date();
+  // var monthCalendar = withMinMaxDate(
+  //   createMonthCalendar(date),
+  //   new Date('10-01-2024'),
+  //   new Date('12-31-2024')
+  // );
   var monthCalendar = createMonthCalendar(date);
   window.customMonthCalendar = monthCalendar;
 
@@ -51,8 +57,18 @@ export var CustomCalendar: Component = () => {
           {'<-'}
         </button>
         <div class="header__year">
-          {monthCalendar.year}
-          <YearSelect />
+          {/* {monthCalendar.year} */}
+          {
+            (() => {
+              var year = `${monthCalendar.year}`;
+
+              return (
+                <YearSelect value={year}>
+                  <option value={year}>{year}</option>
+                </YearSelect>
+              );
+            }) as any
+          }
         </div>
         <div class="header__month">{formatMonth(monthCalendar.dateTime)}</div>
         <button
